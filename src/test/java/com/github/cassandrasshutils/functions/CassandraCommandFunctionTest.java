@@ -19,10 +19,12 @@ import com.github.cassandrasshutils.command.RemoteCommandDao;
 import com.github.cassandrasshutils.command.impl.SSHCommandDaoImpl;
 import com.github.cassandradockertesthelper.AbstractCassandraDockerParameterizedTest;
 import com.github.cassandradockertesthelper.DockerHelper;
+import com.github.cassandrasshutils.exceptions.CassandraCrashedException;
 import com.github.cassandrasshutils.exceptions.ConnectionException;
 import java.io.File;
 import java.io.IOException;
 import org.junit.AfterClass;
+import org.junit.Assert;
 import static org.junit.Assert.assertEquals;
 import org.junit.Before;
 import org.junit.BeforeClass;
@@ -63,12 +65,12 @@ public class CassandraCommandFunctionTest extends AbstractCassandraDockerParamet
         commandDao.connect();
 
     }
-    
+
     /**
      * Test of startCassandra method, of class CassandraCommandFunction.
      */
     @Test
-    public void testStartCassandra() throws Exception
+    public void testStartCassandra() throws Exception, CassandraCrashedException
     {
         System.out.println("startCassandra version: " + super.getCassandraVersion());
         boolean expResult = true;
@@ -78,12 +80,41 @@ public class CassandraCommandFunctionTest extends AbstractCassandraDockerParamet
         result = CassandraCommandFunction.startCassandra(commandDao);
         assertEquals(expResult, result);
     }
+    
+        /**
+     * Test of startCassandra method, of class CassandraCommandFunction.
+     */
+    @Test
+    public void testStopCassandra() throws Exception, CassandraCrashedException
+    {
+        System.out.println("stopCassandra version: " + super.getCassandraVersion());
+        boolean expResult = true;
+        //start cassandra up so it's running for our test
+        boolean result = CassandraCommandFunction.startCassandra(commandDao);
+        assertEquals(expResult, result);//make sure it didn't get hosed up
+        //run it again
+        result = CassandraCommandFunction.stopCassandra(commandDao);
+        assertEquals(expResult, result);
+        Assert.assertFalse(CassandraCommandFunction.isCassandraRunning(commandDao));
+    }
+
+    /**
+     * Test of restartCassandra method, of class CassandraCommandFunction.
+     */
+    @Test
+    public void testRestartCassandra() throws Exception, CassandraCrashedException
+    {
+        System.out.println("restartCassandra version: " + super.getCassandraVersion());
+        boolean expResult = true;
+        boolean result = CassandraCommandFunction.restartCassandra(commandDao);
+        assertEquals(expResult, result);
+    }
 
     /**
      * Test of isCassandraRunning method, of class CassandraCommandFunction.
      */
     @Test
-    public void testIsCassandraRunning() throws Exception
+    public void testIsCassandraRunning() throws Exception, CassandraCrashedException
     {
         System.out.println("isCassandraRunning version: " + super.getCassandraVersion());
         boolean expResult = false;

@@ -16,13 +16,17 @@
 package com.github.cassandrasshutils.exceptions;
 
 /**
- * Exception that indicates a problem establishing an <i>initial connection</i> to a remote system.
+ * Exception that indicates a problem establishing an <i>initial connection</i>
+ * to a remote system.
+ *
  * @author jeffrey
  */
-public class CannotConnectException extends ConnectionException{
+public class CannotConnectException extends ConnectionException
+{
 
-    public CannotConnectException(Throwable cause) {
+    public CannotConnectException(Throwable cause)
+    {
         super(cause);
     }
-    
+
 }

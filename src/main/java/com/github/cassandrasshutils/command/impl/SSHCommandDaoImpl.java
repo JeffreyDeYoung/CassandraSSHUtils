@@ -37,7 +37,8 @@ import org.slf4j.LoggerFactory;
  *
  * @author jeffrey
  */
-public class SSHCommandDaoImpl implements RemoteCommandDao {
+public class SSHCommandDaoImpl implements RemoteCommandDao
+{
 
     /**
      * Host we are connecting to.
@@ -83,23 +84,39 @@ public class SSHCommandDaoImpl implements RemoteCommandDao {
      * @param port Port to connect to SSH over.
      * @param password Password for the associated user.
      */
-    public SSHCommandDaoImpl(String host, String userName, int port, String password) {
-        if (host == null) {
+    public SSHCommandDaoImpl(String host, String userName, int port, String password)
+    {
+        if (host == null)
+        {
             throw new IllegalArgumentException("Host cannot be null");
         }
         this.host = host;
-        if (userName == null) {
+        if (userName == null)
+        {
             throw new IllegalArgumentException("Username cannot be null");
         }
         this.userName = userName;
-        if (port == 0) {
+        if (port == 0)
+        {
             throw new IllegalArgumentException("Zero (0) is not a valid port");
         }
         this.port = port;
-        if (password == null) {
+        if (password == null)
+        {
             throw new IllegalArgumentException("Password cannot be null");
         }
         this.password = password;
+    }
+
+    /**
+     * Get the IP address or hostname that this DAO is associated with.
+     *
+     * @return The IP address or hostname that this DAO is associated with.
+     */
+    @Override
+    public String getHost()
+    {
+        return host;
     }
 
     /**
@@ -113,20 +130,25 @@ public class SSHCommandDaoImpl implements RemoteCommandDao {
      * @param pemPassphrase Password to the PEM file. Pass null if the PEM is
      * not password protected.
      */
-    public SSHCommandDaoImpl(String host, String userName, int port, String pem, String pemPassphrase) {
-        if (host == null) {
+    public SSHCommandDaoImpl(String host, String userName, int port, String pem, String pemPassphrase)
+    {
+        if (host == null)
+        {
             throw new IllegalArgumentException("Host cannot be null");
         }
         this.host = host;
-        if (userName == null) {
+        if (userName == null)
+        {
             throw new IllegalArgumentException("Username cannot be null");
         }
         this.userName = userName;
-        if (port == 0) {
+        if (port == 0)
+        {
             throw new IllegalArgumentException("Zero (0) is not a valid port");
         }
         this.port = port;
-        if (pem == null) {
+        if (pem == null)
+        {
             throw new IllegalArgumentException("PEM cannot be null");
         }
         this.pem = pem;
@@ -141,27 +163,34 @@ public class SSHCommandDaoImpl implements RemoteCommandDao {
      * server.
      */
     @Override
-    public void connect() throws CannotConnectException {
+    public void connect() throws CannotConnectException
+    {
         logger.debug("Attempting to log on to: " + host + " via SSH.");
-        try {
+        try
+        {
             JSch jsch = new JSch();
             session = jsch.getSession(userName, host, port);
             session.setConfig("StrictHostKeyChecking", "no");//TODO: handle this more responsibly
-            if (pem != null) {//if pem is present, use that
+            if (pem != null)
+            {//if pem is present, use that
                 //TODO: not sure if this is right
-                if (pemPassphrase != null) {
+                if (pemPassphrase != null)
+                {
                     jsch.addIdentity(pem, pemPassphrase);
                     jsch.addIdentity(pem);
-                } else {
+                } else
+                {
                     jsch.addIdentity(pem);
                 }
                 session.setIdentityRepository(jsch.getIdentityRepository());
-            } else {//if pem not present, use the password
+            } else
+            {//if pem not present, use the password
                 session.setPassword(password);
             }
 
             session.connect();
-        } catch (JSchException e) {
+        } catch (JSchException e)
+        {
             throw new CannotConnectException(e);
         }
     }
@@ -171,8 +200,10 @@ public class SSHCommandDaoImpl implements RemoteCommandDao {
      * your connection gets properly ended.
      */
     @Override
-    public void logOff() {
-        if (session != null) {
+    public void logOff()
+    {
+        if (session != null)
+        {
             session.disconnect();
         }
     }
@@ -187,15 +218,18 @@ public class SSHCommandDaoImpl implements RemoteCommandDao {
      * @throws IOException if there is a problem pulling or writing the file.
      */
     @Override
-    public void pullFile(String remoteFileToPull, File localFile) throws ConnectionException, IOException {
+    public void pullFile(String remoteFileToPull, File localFile) throws ConnectionException, IOException
+    {
         logger.debug("Pulling file: '" + remoteFileToPull + "' from: " + host + " to: " + localFile.getAbsolutePath());
         checkConnection();
-        try {
+        try
+        {
             Channel channel = session.openChannel("sftp");
             channel.connect();
             ChannelSftp c = (ChannelSftp) channel;
             c.get(remoteFileToPull, localFile + File.separator);
-        } catch (JSchException | SftpException e) {
+        } catch (JSchException | SftpException e)
+        {
             throw new ConnectionException(e);
         }
     }
@@ -209,15 +243,18 @@ public class SSHCommandDaoImpl implements RemoteCommandDao {
      * @throws IOException if there is a problem reading or sending the file.
      */
     @Override
-    public void pushFile(File localFile, String remotePath) throws ConnectionException, IOException {
+    public void pushFile(File localFile, String remotePath) throws ConnectionException, IOException
+    {
         logger.debug("Pushing file: '" + localFile.getAbsolutePath() + "' to: " + host + ": " + remotePath);
         checkConnection();
-        try {
+        try
+        {
             Channel channel = session.openChannel("sftp");
             channel.connect();
             ChannelSftp c = (ChannelSftp) channel;
             c.put(localFile.getAbsolutePath(), remotePath + File.separator);
-        } catch (JSchException | SftpException e) {
+        } catch (JSchException | SftpException e)
+        {
             throw new ConnectionException(e);
         }
     }
@@ -231,17 +268,20 @@ public class SSHCommandDaoImpl implements RemoteCommandDao {
      * @throws ConnectionException if there is a problem with the connection.
      */
     @Override
-    public String sendCommand(String commandToSend) throws ConnectionException, IOException {
+    public String sendCommand(String commandToSend) throws ConnectionException, IOException
+    {
         logger.debug("Sending command: '" + commandToSend + "' to server: " + host);
         checkConnection();
         StringBuilder sb = new StringBuilder();
-        try {
+        try
+        {
             Channel c = session.openChannel("exec");
             ((ChannelExec) c).setCommand(commandToSend);
             c.connect();
             InputStream outputFromCommand = c.getInputStream();
             int readByte = outputFromCommand.read();
-            while (readByte != 0xffffffff) {
+            while (readByte != 0xffffffff)
+            {
                 sb.append((char) readByte);
                 readByte = outputFromCommand.read();
             }
@@ -249,7 +289,8 @@ public class SSHCommandDaoImpl implements RemoteCommandDao {
             String response = sb.toString().trim();
             logger.debug("Received Response: " + response);
             return response;
-        } catch (JSchException e) {
+        } catch (JSchException e)
+        {
             throw new ConnectionException(e);
         }
     }
@@ -259,8 +300,10 @@ public class SSHCommandDaoImpl implements RemoteCommandDao {
      *
      * @throws ConnectionException If we are not connected.
      */
-    private void checkConnection() throws ConnectionException {
-        if (session == null || !session.isConnected()) {
+    private void checkConnection() throws ConnectionException
+    {
+        if (session == null || !session.isConnected())
+        {
             throw new ConnectionException("Not connected to server. Call connect first.");
         }
     }

@@ -21,6 +21,7 @@ import com.github.cassandradockertesthelper.AbstractCassandraDockerParameterized
 import com.github.cassandradockertesthelper.DockerHelper;
 import com.github.cassandrasshutils.command.domain.Server;
 import com.github.cassandrasshutils.command.impl.CQLDaoImpl;
+import com.github.cassandrasshutils.exceptions.CassandraCrashedException;
 import com.github.cassandrasshutils.exceptions.ConnectionException;
 import com.github.cassandrasshutils.functions.CassandraCommandFunction;
 import java.io.File;
@@ -59,7 +60,7 @@ public class CQLDaoImplTest extends AbstractCassandraDockerParameterizedTest
     }
 
     @Before
-    public void setUp() throws ConnectionException, IOException, InterruptedException
+    public void setUp() throws ConnectionException, IOException, InterruptedException, CassandraCrashedException
     {
         dockerId = super.spinUpNewCassandraDockerBox();
         dockerIp = DockerHelper.getDockerIp(dockerId);

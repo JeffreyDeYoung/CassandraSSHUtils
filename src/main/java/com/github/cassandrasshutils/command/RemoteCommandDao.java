@@ -29,6 +29,12 @@ import java.io.IOException;
 public interface RemoteCommandDao {
 
     /**
+     * Get the IP address or hostname that this DAO is associated with.
+     * @return The IP address or hostname that this DAO is associated with.
+     */
+    public String getHost();
+    
+    /**
      * Establishes a connection to a remote system.
      *
      * @throws CannotConnectException if there is an problem connecting.
